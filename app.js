@@ -1,23 +1,21 @@
+const path = require("path");
+
 const express = require("express");
+
+const adminRoutes = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
+
 const bodyParser = require("body-parser");
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/add-product", (req, res, next) => {
-  res.send(
-    "<form method='post' action='/product'><input type='text' name='title' /><button type='submit'>Add Product</button></form>"
-  );
-});
+app.use("/admin", adminRoutes);
+app.use(shopRoutes);
 
-app.post("/product", (req, res) => {
-  console.log(req.body);
-  res.redirect("/");
-});
-
-app.use("/", (req, res, next) => {
-  res.send("<h1>Hello from Express!</h1>");
+app.use((req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, "views", "not-found.html"));
 });
 
 app.listen(3000);
