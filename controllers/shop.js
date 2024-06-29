@@ -1,7 +1,9 @@
 const Product = require("../models/product");
 
-const getIndex = (req, res, next) => {
+const getIndex = async (req, res, next) => {
+  const products = await Product.fetchAll();
   res.render("shop/index", {
+    prods: products,
     pageTitle: "Home",
     path: "/",
   });

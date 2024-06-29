@@ -1,8 +1,1 @@
-[
-  {
-    "title": "Of Mice and Men",
-    "imageUrl": "https://m.media-amazon.com/images/M/MV5BNGFhOGEyYjItNjNhYS00ZmE4LTgzNWQtZTc4NDI5OGNmMTdhXkEyXkFqcGdeQXVyMTUzMDUzNTI3._V1_.jpg",
-    "description": "A 1937 novella written by American author John Steinbeck. It narrates the experiences of George Milton and Lennie Small, two displaced migrant ranch workers, who move from place to place in California in search of new job opportunities during the Great Depression in the United States.",
-    "price": "12"
-  }
-]
+[{"title":"Of Mice and Men","imageUrl":"https://m.media-amazon.com/images/M/MV5BNGFhOGEyYjItNjNhYS00ZmE4LTgzNWQtZTc4NDI5OGNmMTdhXkEyXkFqcGdeQXVyMTUzMDUzNTI3._V1_.jpg","description":"A 1937 novella written by American author John Steinbeck. It narrates the experiences of George Milton and Lennie Small, two displaced migrant ranch workers, who move from place to place in California in search of new job opportunities during the Great Depression in the United States.","price":"12"},{"title":"Grapes Of Wraith","imageUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ad/The_Grapes_of_Wrath_%281939_1st_ed_cover%29.jpg","description":"Set during the Great Depression, the novel focuses on the Joads, a poor family of tenant farmers driven from their Oklahoma home by drought, economic hardship, agricultural industry changes, and bank foreclosures forcing tenant farmers out of work. Due to their nearly hopeless situation, and in part because they are trapped in the Dust Bowl, the Joads set out for California on the \"mother road\", along with thousands of other \"Okies\" seeking jobs, land, dignity, and a future.","price":"21.37"}]
