@@ -6,8 +6,11 @@ const rootDir = require("../utils/path");
 const p = path.join(rootDir, "data", "products.json");
 
 class Product {
-  constructor(title) {
+  constructor({ title, imageUrl, description, price }) {
     this.title = title;
+    this.imageUrl = imageUrl;
+    this.description = description;
+    this.price = price;
   }
 
   static async fetchAll() {
