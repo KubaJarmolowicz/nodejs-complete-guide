@@ -1,11 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-
 const Cart = require("./cart");
 
-const rootDir = require("../utils/path");
-
-const p = path.join(rootDir, "data", "products.json");
+const db = require("../utils/database");
 
 class Product {
   constructor({ id, title, imageUrl, description, price }) {
@@ -17,54 +12,35 @@ class Product {
   }
 
   static async fetchAll() {
-    return new Promise((resolve, reject) => {
-      fs.readFile(p, (err, fileContent) => {
-        if (err) {
-          resolve([]);
-        }
-
-        resolve(JSON.parse(fileContent));
-      });
-    });
+    try {
+      const [products] = await db.execute("SELECT * FROM products");
+      return products;
+    } catch (e) {
+      console.log("ERROR fetching from db in fetchAll", e);
+      return [];
+    }
   }
 
   static async findById(id) {
-    const products = await Product.fetchAll();
-    return products.find((p) => p.id === id);
-  }
-
-  static async deleteById(id) {
-    const products = await Product.fetchAll();
-    const updatedProducts = products.filter((prod) => prod.id !== id);
-
-    fs.writeFile(p, JSON.stringify(updatedProducts), (e) => {
-      if (e) {
-        console.log(e);
-        return;
-      }
-
-      Cart.deleteProduct(id);
-    });
+    try {
+      const [productRow] = await db.execute(
+        "SELECT * FROM products WHERE products.id = ?",
+        [id]
+      );
+      return productRow[0];
+    } catch (e) {
+      console.log("ERROR fetching from db in findById", e);
+    }
   }
 
   async save() {
-    const products = await Product.fetchAll();
-
-    if (this.id) {
-      const existingProductIndex = products.findIndex(
-        (prod) => prod.id === this.id
+    try {
+      return db.execute(
+        "INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)",
+        [this.title, this.price, this.imageUrl, this.description]
       );
-      const updatedProducts = [...products];
-      updatedProducts[existingProductIndex] = this;
-      fs.writeFile(p, JSON.stringify(updatedProducts), (e) => {
-        console.log(e);
-      });
-    } else {
-      this.id = Math.random().toString();
-      products.push(this);
-      fs.writeFile(p, JSON.stringify(products), (e) => {
-        console.log(e);
-      });
+    } catch (e) {
+      console.log("ERROR saving to db in save", e);
     }
   }
 }

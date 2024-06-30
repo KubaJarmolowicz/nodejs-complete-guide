@@ -2,31 +2,43 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 
 const getIndex = async (req, res, next) => {
-  const products = await Product.fetchAll();
-  res.render("shop/index", {
-    prods: products,
-    pageTitle: "Home",
-    path: "/",
-  });
+  try {
+    const products = await Product.fetchAll();
+    res.render("shop/index", {
+      prods: products,
+      pageTitle: "Home",
+      path: "/",
+    });
+  } catch (e) {
+    console.log("ERROR -> Cannot render index", e);
+  }
 };
 
 const getProducts = async (req, res, next) => {
-  const products = await Product.fetchAll();
-  res.render("shop/product-list", {
-    prods: products,
-    pageTitle: "Products",
-    path: "/products",
-  });
+  try {
+    const products = await Product.fetchAll();
+    res.render("shop/product-list", {
+      prods: products,
+      pageTitle: "Products",
+      path: "/products",
+    });
+  } catch (e) {
+    console.log("ERROR getProducts -> Cannot render /products", e);
+  }
 };
 
 const getProduct = async (req, res, next) => {
-  const productId = req.params.productId;
-  const product = await Product.findById(productId);
-  res.render("shop/product-detail", {
-    product,
-    pageTitle: product.title,
-    path: "/products",
-  });
+  try {
+    const productId = req.params.productId;
+    const product = await Product.findById(productId);
+    res.render("shop/product-detail", {
+      product,
+      pageTitle: product.title,
+      path: "/products",
+    });
+  } catch (e) {
+    console.log("ERROR getProduct -> Cannot render /products", e);
+  }
 };
 
 const getCart = async (req, res, next) => {
@@ -60,7 +72,6 @@ const postCartDeleteItem = async (req, res, next) => {
   const { id } = req.body;
   await Cart.deleteProduct(id);
   res.redirect("/cart");
-  //res.redirect("/cart");
 };
 
 const getCheckout = (req, res, next) => {

@@ -8,17 +8,21 @@ const getAddProduct = (req, res, next) => {
   });
 };
 
-const postAddProduct = (req, res) => {
-  const { title, imageUrl, price, description } = req.body;
-  const product = new Product({
-    id: null,
-    title,
-    imageUrl,
-    price,
-    description,
-  });
-  product.save();
-  res.redirect("/");
+const postAddProduct = async (req, res) => {
+  try {
+    const { title, imageUrl, price, description } = req.body;
+    const product = new Product({
+      id: null,
+      title,
+      imageUrl,
+      price,
+      description,
+    });
+    await product.save();
+    res.redirect("/");
+  } catch (e) {
+    console.log("ERROR -> Cannot add product", e);
+  }
 };
 
 const getAdminProducts = async (req, res, next) => {

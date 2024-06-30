@@ -20,14 +20,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
-db.execute("SELECT * FROM products")
-  .then((res) => {
-    console.log("db res", res);
-  })
-  .catch((e) => {
-    console.log("Error executing a query on db: ", e);
-  });
-
 app.use(get404);
 
 app.listen(3000, () => {
