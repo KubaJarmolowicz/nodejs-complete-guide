@@ -29,10 +29,23 @@ const getProduct = async (req, res, next) => {
   });
 };
 
-const getCart = (req, res, next) => {
+const getCart = async (req, res, next) => {
+  const { products: cartProducts } = await Cart.getContent();
+  const products = await Product.fetchAll();
+  const productsInCart = products.reduce((acc, item) => {
+    const associatedCartProd = cartProducts.find(
+      (cartProd) => cartProd.id === item.id
+    );
+    if (!associatedCartProd) {
+      return acc;
+    }
+
+    return [...acc, { productData: item, qty: associatedCartProd.qty }];
+  }, []);
   res.render("shop/cart", {
     pageTitle: "Your Cart",
     path: "/cart",
+    products: productsInCart,
   });
 };
 
@@ -40,7 +53,14 @@ const postCart = async (req, res, next) => {
   const { productId } = req.body;
   const product = await Product.findById(productId);
   Cart.addProduct(product.id, product.price);
-  res.redirect("/");
+  res.redirect("/cart");
+};
+
+const postCartDeleteItem = async (req, res, next) => {
+  const { id } = req.body;
+  await Cart.deleteProduct(id);
+  res.redirect("/cart");
+  //res.redirect("/cart");
 };
 
 const getCheckout = (req, res, next) => {
@@ -63,6 +83,7 @@ module.exports = {
   getProduct,
   getCart,
   postCart,
+  postCartDeleteItem,
   getCheckout,
   getOrders,
 };

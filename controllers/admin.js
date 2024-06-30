@@ -55,7 +55,6 @@ const getEditProduct = async (req, res, next) => {
 
 const postEditProduct = (req, res, next) => {
   const { id, title, imageUrl, price, description } = req.body;
-  console.log("WTF??", id);
   const updatedProduct = new Product({
     id,
     title,
@@ -67,10 +66,17 @@ const postEditProduct = (req, res, next) => {
   return res.redirect("/admin/products");
 };
 
+const postDeleteProduct = async (req, res, next) => {
+  const { id } = req.body;
+  await Product.deleteById(id);
+  return res.redirect("/admin/products");
+};
+
 module.exports = {
   getAddProduct,
   postAddProduct,
   getAdminProducts,
   getEditProduct,
   postEditProduct,
+  postDeleteProduct,
 };
