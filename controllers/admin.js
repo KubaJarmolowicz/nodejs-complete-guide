@@ -11,14 +11,13 @@ const getAddProduct = (req, res, next) => {
 const postAddProduct = async (req, res) => {
   try {
     const { title, imageUrl, price, description } = req.body;
-    const product = new Product({
-      id: null,
+    const product = await Product.create({
       title,
-      imageUrl,
       price,
+      imageUrl,
       description,
     });
-    await product.save();
+    console.log("Added the product!");
     res.redirect("/");
   } catch (e) {
     console.log("ERROR -> Cannot add product", e);
@@ -26,12 +25,16 @@ const postAddProduct = async (req, res) => {
 };
 
 const getAdminProducts = async (req, res, next) => {
-  const products = await Product.fetchAll();
-  res.render("admin/products", {
-    prods: products,
-    pageTitle: "Admin Products",
-    path: "/admin/products",
-  });
+  try {
+    const products = await Product.findAll();
+    res.render("admin/products", {
+      prods: products,
+      pageTitle: "Admin Products",
+      path: "/admin/products",
+    });
+  } catch (e) {
+    console.log("ERROR -> Cannot execute findAll", e);
+  }
 };
 
 const getEditProduct = async (req, res, next) => {
@@ -43,7 +46,7 @@ const getEditProduct = async (req, res, next) => {
   }
 
   const prodId = req.params.productId;
-  const product = await Product.findById(prodId);
+  const product = await Product.findByPk(prodId);
 
   if (!product) {
     return res.redirect("/");
@@ -57,23 +60,43 @@ const getEditProduct = async (req, res, next) => {
   });
 };
 
-const postEditProduct = (req, res, next) => {
-  const { id, title, imageUrl, price, description } = req.body;
-  const updatedProduct = new Product({
-    id,
-    title,
-    imageUrl,
-    price,
-    description,
-  });
-  updatedProduct.save();
-  return res.redirect("/admin/products");
+const postEditProduct = async (req, res, next) => {
+  try {
+    const { id, title, imageUrl, price, description } = req.body;
+    const updatedProduct = await Product.update(
+      {
+        id,
+        title,
+        imageUrl,
+        price,
+        description,
+      },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+    //updatedProduct.save();
+    console.log("Product updated successfully!");
+    return res.redirect("/admin/products");
+  } catch (e) {
+    console.log("ERROR -> Couldn't edit the product!", e);
+  }
 };
 
 const postDeleteProduct = async (req, res, next) => {
-  const { id } = req.body;
-  await Product.deleteById(id);
-  return res.redirect("/admin/products");
+  try {
+    const { id } = req.body;
+    await Product.destroy({
+      where: {
+        id,
+      },
+    });
+    return res.redirect("/admin/products");
+  } catch (e) {
+    console.log("ERROR -> Couldn't delete the product!", e);
+  }
 };
 
 module.exports = {

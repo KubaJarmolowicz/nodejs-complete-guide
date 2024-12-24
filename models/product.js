@@ -1,48 +1,27 @@
-const Cart = require("./cart");
+const Sequelize = require("sequelize").Sequelize;
 
-const db = require("../utils/database");
+const sequelize = require("../utils/database");
 
-class Product {
-  constructor({ id, title, imageUrl, description, price }) {
-    this.id = id;
-    this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
-    this.price = price;
-  }
-
-  static async fetchAll() {
-    try {
-      const [products] = await db.execute("SELECT * FROM products");
-      return products;
-    } catch (e) {
-      console.log("ERROR fetching from db in fetchAll", e);
-      return [];
-    }
-  }
-
-  static async findById(id) {
-    try {
-      const [productRow] = await db.execute(
-        "SELECT * FROM products WHERE products.id = ?",
-        [id]
-      );
-      return productRow[0];
-    } catch (e) {
-      console.log("ERROR fetching from db in findById", e);
-    }
-  }
-
-  async save() {
-    try {
-      return db.execute(
-        "INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)",
-        [this.title, this.price, this.imageUrl, this.description]
-      );
-    } catch (e) {
-      console.log("ERROR saving to db in save", e);
-    }
-  }
-}
+const Product = sequelize.define("product", {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+  title: Sequelize.STRING,
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+  },
+  imageUrl: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+});
 
 module.exports = Product;

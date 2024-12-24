@@ -7,7 +7,7 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
 const { get404 } = require("./controllers/error");
-const db = require("./utils/database");
+const sequelize = require("./utils/database");
 
 const app = express();
 
@@ -22,6 +22,13 @@ app.use(shopRoutes);
 
 app.use(get404);
 
-app.listen(3000, () => {
-  console.log("Server is listening on port 3000");
-});
+sequelize
+  .sync()
+  .then((result) => {
+    app.listen(3000, () => {
+      console.log("Server is listening on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.log("ERROR syncing the db -> ", err);
+  });
