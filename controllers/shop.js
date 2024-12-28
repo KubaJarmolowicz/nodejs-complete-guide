@@ -42,36 +42,80 @@ const getProduct = async (req, res, next) => {
 };
 
 const getCart = async (req, res, next) => {
-  const { products: cartProducts } = await Cart.getContent();
-  const products = await Product.findAll();
-  const productsInCart = products.reduce((acc, item) => {
-    const associatedCartProd = cartProducts.find(
-      (cartProd) => cartProd.id === item.id
-    );
-    if (!associatedCartProd) {
-      return acc;
-    }
-
-    return [...acc, { productData: item, qty: associatedCartProd.qty }];
-  }, []);
-  res.render("shop/cart", {
-    pageTitle: "Your Cart",
-    path: "/cart",
-    products: productsInCart,
-  });
+  try {
+    const cart = await req.user.getCart();
+    const products = await cart?.getProducts();
+    res.render("shop/cart", {
+      pageTitle: "Your Cart",
+      path: "/cart",
+      products,
+    });
+  } catch (e) {
+    console.log("ERROR getCart -> Cannot render /cart", e);
+  }
 };
 
 const postCart = async (req, res, next) => {
-  const { productId } = req.body;
-  const product = await Product.findByPk(productId);
-  Cart.addProduct(product.id, product.price);
-  res.redirect("/cart");
+  try {
+    const {
+      user,
+      body: { productId },
+    } = req;
+    const cart = await user.getCart();
+    const products = await cart.getProducts({
+      where: {
+        id: productId,
+      },
+    });
+
+    const product = products?.[0];
+
+    if (product) {
+      const oldQuantity = product.cartItem.quantity;
+      await cart.addProduct(product, {
+        through: {
+          quantity: oldQuantity + 1,
+        },
+      });
+    } else {
+      const definition = await Product.findByPk(productId);
+      await cart.addProduct(definition, {
+        through: {
+          quantity: 1,
+        },
+      });
+    }
+    res.redirect("/cart");
+  } catch (e) {
+    console.log("ERROR postCart -> Cannot render /cart", e);
+  }
 };
 
-const postCartDeleteItem = async (req, res, next) => {
-  const { id } = req.body;
-  await Cart.deleteProduct(id);
-  res.redirect("/cart");
+const postCartDeleteProduct = async (req, res, next) => {
+  try {
+    const {
+      user,
+      body: { productId },
+    } = req;
+
+    const cart = await user.getCart();
+    const products = await cart.getProducts({
+      where: {
+        id: productId,
+      },
+    });
+
+    const product = products?.[0];
+
+    if (!product) {
+      // TODO: code 400 bad request?
+    }
+
+    await product.cartItem.destroy();
+    res.redirect("/cart");
+  } catch (e) {
+    console.log("ERROR postCartDeleteProduct -> Cannot render /cart", e);
+  }
 };
 
 const getCheckout = (req, res, next) => {
@@ -94,7 +138,7 @@ module.exports = {
   getProduct,
   getCart,
   postCart,
-  postCartDeleteItem,
+  postCartDeleteProduct,
   getCheckout,
   getOrders,
 };
