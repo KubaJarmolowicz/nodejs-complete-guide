@@ -11,11 +11,12 @@ const getAddProduct = (req, res, next) => {
 const postAddProduct = async (req, res) => {
   try {
     const { title, imageUrl, price, description } = req.body;
-    const product = await Product.create({
+    const product = await req.user.createProduct({
       title,
       price,
       imageUrl,
       description,
+      userId: req.user.id,
     });
     console.log("Added the product!");
     res.redirect("/");
@@ -26,7 +27,7 @@ const postAddProduct = async (req, res) => {
 
 const getAdminProducts = async (req, res, next) => {
   try {
-    const products = await Product.findAll();
+    const products = await req.user.getProducts();
     res.render("admin/products", {
       prods: products,
       pageTitle: "Admin Products",
@@ -46,7 +47,15 @@ const getEditProduct = async (req, res, next) => {
   }
 
   const prodId = req.params.productId;
-  const product = await Product.findByPk(prodId);
+  const products = await req.user.getProducts({
+    where: {
+      id: prodId,
+    },
+  });
+
+  const product = products?.[0];
+
+  console.log("$$$$ product", product);
 
   if (!product) {
     return res.redirect("/");
