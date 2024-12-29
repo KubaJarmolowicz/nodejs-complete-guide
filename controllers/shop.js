@@ -1,5 +1,6 @@
 const Product = require("../models/product");
-const Cart = require("../models/cart");
+const CartItem = require("../models/cart-item");
+const OrderItem = require("../models/order-item");
 
 const getIndex = async (req, res, next) => {
   try {
@@ -118,18 +119,52 @@ const postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-const getCheckout = (req, res, next) => {
-  res.render("shop/checkout", {
-    pageTitle: "Checkout",
-    path: "/checkout",
-  });
+const postOrder = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const cart = await user.getCart({
+      include: {
+        model: Product,
+        through: {
+          model: CartItem,
+        },
+      },
+    });
+
+    const newOrder = await user.createOrder();
+    await newOrder.addProducts(
+      cart.products.map((product) => {
+        product.orderItem = {
+          quantity: product.cartItem.quantity,
+        };
+        return product;
+      })
+    );
+    await cart.setProducts(null);
+    res.redirect("/orders");
+  } catch (e) {
+    console.log("ERROR postOrder -> Cannot render /orders", e);
+  }
 };
 
-const getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    pageTitle: "Your Orders",
-    path: "/orders",
-  });
+const getOrders = async (req, res, next) => {
+  try {
+    const orders = await req.user.getOrders({
+      include: {
+        model: Product,
+        through: {
+          model: OrderItem,
+        },
+      },
+    });
+    res.render("shop/orders", {
+      pageTitle: "Your Orders",
+      path: "/orders",
+      orders,
+    });
+  } catch (e) {
+    console.log("ERROR getOrders -> Cannot render /orders", e);
+  }
 };
 
 module.exports = {
@@ -139,6 +174,6 @@ module.exports = {
   getCart,
   postCart,
   postCartDeleteProduct,
-  getCheckout,
   getOrders,
+  postOrder,
 };
