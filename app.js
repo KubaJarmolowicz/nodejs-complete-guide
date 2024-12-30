@@ -7,13 +7,7 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
 const { get404 } = require("./controllers/error");
-const sequelize = require("./utils/database");
-const Product = require("./models/product");
-const User = require("./models/user");
-const Cart = require("./models/cart");
-const CartItem = require("./models/cart-item");
-const Order = require("./models/order");
-const OrderItem = require("./models/order-item");
+const { mongoConnect } = require("./utils/database");
 
 const app = express();
 
@@ -24,14 +18,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(async (req, res, next) => {
-  try {
-    const user = await User.findByPk(1);
-    req.user = user;
-  } catch (e) {
-    console.log("Cannot assign user to request!");
-  } finally {
-    next();
-  }
+  // try {
+  //   const user = await User.findByPk(1);
+  //   req.user = user;
+  // } catch (e) {
+  //   console.log("Cannot assign user to request!");
+  // } finally {
+  //   next();
+  // }
+  next();
 });
 
 app.use("/admin", adminRoutes);
@@ -39,43 +34,8 @@ app.use(shopRoutes);
 
 app.use(get404);
 
-Product.belongsTo(User, {
-  constraints: true,
-  onDelete: "CASCADE",
-});
-User.hasMany(Product);
-User.hasOne(Cart);
-Cart.belongsTo(User);
-Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem });
-User.hasMany(Order);
-Order.belongsTo(User);
-Order.belongsToMany(Product, { through: OrderItem });
-Product.belongsToMany(Order, { through: OrderItem });
-
-sequelize
-  .sync()
-  .then(() => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      return User.create({
-        name: "Testomir",
-        email: "email@example.com",
-      });
-    }
-
-    return Promise.resolve(user);
-  })
-  .then((user) => {
-    return user.createCart();
-  })
-  .then(() => {
-    app.listen(3000, () => {
-      console.log("Server is listening on port 3000");
-    });
-  })
-  .catch((err) => {
-    console.log("ERROR syncing the db -> ", err);
+mongoConnect(() => {
+  app.listen(3000, () => {
+    console.log("Server is listening on port 3000");
   });
+});
